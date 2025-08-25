@@ -69,9 +69,9 @@ def adicionar_letra_correta (letra: str, palavra: str, palavra_final: str) -> st
     Verifica se 'letra' está contida na 'palavra' e revela os locais em que ela aparece.
 
     Args:
-        letra(str): Letra enviada pelo usuário.
-        palavra(str): Palavra sorteada pelo sistema.
-        palavra_final(str): Palavra sorteada preenchida por '*'.
+        letra (str): Letra enviada pelo usuário.
+        palavra (str): Palavra sorteada pelo sistema.
+        palavra_final (str): Palavra sorteada preenchida por '*'.
 
     Returns:
         str: Se 'letra' estiver na 'palavra', revela os locais em que ela aparece, se
@@ -119,6 +119,64 @@ def adicionar_letra_correta (letra: str, palavra: str, palavra_final: str) -> st
 
     return ''.join(palavra_final)
 
+def mensagem_erros_de_entrada_de_texto(entrada: str, limite_letras: int = None, nome_campo: str = None) -> str | bool:
+    """
+    Testa uma entrada de texto e retorna uma mensagem de erro de acordo.
+
+    Args:
+        entrada (str): Texto enviado pelo usuário.
+        limite_letras (int | None, opcional): Limite de caractéres da entrada.
+        nome_campo (str | None, opcional): Nome do campo preenchido.
+
+    Returns:
+        str: Mensagem relacionada ao erro ocorrido.
+        bool: False caso não ocorra erro algum.
+
+    Raises:
+        TypeError: Se 'entrada' não for str. Se 'limite_letras' não for int/None ou 'nome_campo'
+        não for str/None.
+        ValueError: Se 'entrada' for vazia.
+
+    Example:
+        >>> mensagem_erros_de_entrada_de_texto('naao', 3, 'Continuar?')
+        'Por favor, digite apenas 3 letras'
+
+        >>> mensagem_erros_de_entrada_de_texto('7', 1, 'Letra')
+        'Letra não pode ser um número'
+
+        >>> mensagem_erros_de_entrada_de_texto('a', 1, 'Letra')
+        False
+    """
+
+    #TypeError
+    if not isinstance(entrada, str):
+        raise TypeError(f'entrada deve ser str. Você passou {type(entrada)}')
+    
+    if nome_campo is not None and not isinstance(nome_campo, str):
+        raise TypeError(f'nome_campo deve ser str. Você passou {type(nome_campo)}')
+    
+    if limite_letras is not None and not isinstance(limite_letras, int):
+        raise TypeError(f'limite_letras deve ser int. Você passou {type(limite_letras)}')
+    
+    #ValueError
+    if not entrada:
+        raise ValueError('entrada não pode estar vazia')
+    
+    entrada = entrada.lower().strip()
+
+    if limite_letras is not None and len(entrada) > limite_letras:
+        return (
+        f'Por favor, digite apenas {limite_letras} letra' if limite_letras == 1
+        else f'Por favor, digite apenas {limite_letras} letras'
+    )
+        
+    if entrada.isdigit():
+        if nome_campo:
+            return f'{nome_campo} não pode ser um número'
+        return 'Por favor, não digite números'
+            
+    return False
+
 PALAVRAS_POSSIVEIS = ['amarelo', 'python', 'computador', 'linguagem']
 RESPOSTA_AFIRMATIVA = ['sim', 'iniciar', 's', 'desejo']
 RESPOSTA_NEGATIVA = ['n', 'nao', 'não']
@@ -144,21 +202,17 @@ while True:
             print(f'{palavra_final}')
             
             try:
-                in_letra = tratar_input_texto(input('Digite uma letra: '))
+                entrd_letra = tratar_input_texto(input('Digite uma letra: '))
             except ValueError:
                 print('O campo não pode estar vazio')
                 continue
-
-            if len(in_letra) > 1:
-                print('Digite apenas UMA letra')
+            
+            if mensagem_erros_de_entrada_de_texto(entrd_letra, 1):
+                print(mensagem_erros_de_entrada_de_texto(entrd_letra, 1, 'A resposta'))
                 continue
-
-            elif in_letra.isdigit():
-                print('Digite APENAS letras')
-                continue
-  
-            if verificar_se_letra_esta_na_palavra(in_letra, palavra):
-                palavra_final = adicionar_letra_correta(in_letra, palavra, palavra_final)
+            
+            if verificar_se_letra_esta_na_palavra(entrd_letra, palavra):
+                palavra_final = adicionar_letra_correta(entrd_letra, palavra, palavra_final)
             else:
                 tentativas -= 1
                 print('Letra errada.')
@@ -174,6 +228,6 @@ while True:
     elif iniciar in RESPOSTA_NEGATIVA:
         break
     else:
-        print('Você não digitou um comando')
+        print('Você não digitou um comando válido')
 
 print('Até a proxima')
