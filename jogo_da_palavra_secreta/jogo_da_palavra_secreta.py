@@ -64,13 +64,72 @@ def tratar_input_texto(entrada: str) -> str:
     
     return entrada.lower().strip()
 
+def adicionar_letra_correta (letra: str, palavra: str, palavra_final: str) -> str:
+    """
+    Verifica se 'letra' está contida na 'palavra' e revela os locais em que ela aparece.
+
+    Args:
+        letra(str): Letra enviada pelo usuário.
+        palavra(str): Palavra sorteada pelo sistema.
+        palavra_final(str): Palavra sorteada preenchida por '*'.
+
+    Returns:
+        str: Se 'letra' estiver na 'palavra', revela os locais em que ela aparece, se
+        não, retorna 'palavra_final' sem alterações.
+
+    Raises:
+        TypeError: Se 'letra', 'palavra' ou 'palavra_final' não forem str.
+
+    Example:
+        >>> adicionar_letra_correta('a', 'amarelo', '*******')
+        'a*a****'
+
+        >>> adicionar_letra_correta('y', 'amarelo', '*******')
+        '*******'
+    """
+
+    if not isinstance(letra, str):
+        raise TypeError('letra deve ser str')
+    
+    if not isinstance(palavra, str):
+        raise TypeError('palavra deve ser str')
+    
+    if not isinstance(palavra_final, str):
+        raise TypeError('palavra_final deve ser str')
+    
+    if letra.isdigit():
+        raise ValueError('letra não pode ser um número')
+    
+    if not letra:
+        raise ValueError('letra não pode estar vazia')
+    
+    if not palavra:
+        raise ValueError('palavra não pode estar vazia')
+    
+    if not palavra_final:
+        raise ValueError('palavra_final não pode estar vazia')
+
+    letra = letra.lower().strip()
+    palavra = palavra.lower()
+    palavra_final = list(palavra_final.lower())
+
+    for i, letra_comparada in enumerate(palavra):
+        if letra_comparada == letra:
+            palavra_final[i] = letra
+
+    return ''.join(palavra_final)
+
 PALAVRAS_POSSIVEIS = ['amarelo', 'python', 'computador', 'linguagem']
 RESPOSTA_AFIRMATIVA = ['sim', 'iniciar', 's', 'desejo']
 RESPOSTA_NEGATIVA = ['n', 'nao', 'não']
 
 while True:
     print('Bem vindo ao jogo da palavra secreta!')
-    iniciar = tratar_input_texto(input('Deseja iniciar (sim/não)?: '))
+    try:
+        iniciar = tratar_input_texto(input('Deseja iniciar (sim/não)?: '))
+    except ValueError:
+        print('O campo não pode estar vazio')
+        continue
     
     if iniciar in RESPOSTA_AFIRMATIVA:
 
@@ -84,38 +143,28 @@ while True:
             print(f'Você tem {tentativas} tentativas.')
             print(f'{palavra_final}')
             
-            letra_correta = False
-
-            in_letra = tratar_input_texto(input('Digite uma letra: '))
+            try:
+                in_letra = tratar_input_texto(input('Digite uma letra: '))
+            except ValueError:
+                print('O campo não pode estar vazio')
+                continue
 
             if len(in_letra) > 1:
                 print('Digite apenas UMA letra')
                 continue
+
             elif in_letra.isdigit():
                 print('Digite APENAS letras')
                 continue
-            
-            
-
-            print(verificar_se_letra_esta_na_palavra(in_letra, palavra))
-
-
-
-
-
-
-            for i, letra_comparada in enumerate(palavra):
-                if letra_comparada == in_letra:
-                    palavra_final = palavra_final[:i] + in_letra + palavra_final[i+1:]
-                    letra_correta = True
-
-            if not letra_correta:
+  
+            if verificar_se_letra_esta_na_palavra(in_letra, palavra):
+                palavra_final = adicionar_letra_correta(in_letra, palavra, palavra_final)
+            else:
                 tentativas -= 1
                 print('Letra errada.')
 
-
             if tentativas == 0:
-                print(f'Que pena! você perdeu. A palavra final era "{palavra_final}"')
+                print(f'Que pena! você perdeu. A palavra final era "{palavra}"')
                 break
 
             if palavra_final == palavra:
