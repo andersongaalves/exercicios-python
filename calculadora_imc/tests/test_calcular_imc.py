@@ -1,5 +1,5 @@
 import pytest
-from calculadora_imc import calcular_imc
+from calculadora_imc.calculadora_imc import calcular_imc
 
 def test_imc_metros():
     assert calcular_imc(83.50, 1.82) == 25.21
